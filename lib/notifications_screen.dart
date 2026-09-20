@@ -67,7 +67,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               itemCount: _filters.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final filter = _filters[index];
                 final isActive = filter == _activeFilter;
@@ -100,7 +100,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 : ListView.separated(
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: notifications.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   Divider(height: 1, color: Colors.grey[100]),
               itemBuilder: (context, index) {
                 return _NotificationTile(

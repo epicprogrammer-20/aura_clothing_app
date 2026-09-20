@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class ProductModel {
   final String id;
   final String title;
@@ -13,12 +15,18 @@ class ProductModel {
   final String? instagramHandle;
   final String? facebookUrl;
 
-  // NEW: true only when the photo actually shows a person wearing the
-  // item (not a flat-lay or product-only shot). This is what controls
-  // whether the "worn by" tag overlay appears on the search grid —
-  // separate from postedByName, since a product can have a linked poster
-  // without a visible person in this specific image.
+  // true only when the photo actually shows a person wearing the item.
   final bool personVisible;
+
+  // Used by the Shop screen (filters, badges, quick add).
+  final List<Color> colors;
+  final List<String> sizes;
+  final String? badge; // 'NEW', 'LIMITED', or null
+  final bool inStock;
+
+  // NEW — additional images for the product detail carousel.
+  // The detail screen should show [imageUrl, ...imageUrls] as the full set.
+  final List<String> imageUrls;
 
   ProductModel({
     required this.id,
@@ -33,7 +41,21 @@ class ProductModel {
     this.instagramHandle,
     this.facebookUrl,
     this.personVisible = false,
+    this.colors = const [Colors.black, Colors.white],
+    this.sizes = const ['S', 'M', 'L', 'XL'],
+    this.badge,
+    this.inStock = true,
+    this.imageUrls = const [],
   });
+
+  // Parses "$189" / "$1,299.00" -> 189.0 / 1299.0, for sorting & filtering.
+  double get priceValue {
+    final cleaned = price.replaceAll(RegExp(r'[^0-9.]'), '');
+    return double.tryParse(cleaned) ?? 0.0;
+  }
+
+  // Convenience: all images for the detail carousel, hero first.
+  List<String> get allImages => [imageUrl, ...imageUrls];
 }
 
 // ─────────────────────────────────────────────────────────
@@ -47,11 +69,16 @@ final List<ProductModel> mockProducts = [
     price: '\$189',
     imageUrl:
     'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800',
+    imageUrls: const [
+      'https://images.unsplash.com/photo-1520975954732-35dd22299614?q=80&w=800',
+      'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?q=80&w=800',
+    ],
     imageHeight: 220,
     category: 'Outerwear',
     postedByName: 'Jordan K.',
     instagramHandle: 'jordan.k',
-    personVisible: true, // photo shows a person wearing the jacket
+    personVisible: true,
+    badge: 'NEW',
   ),
   ProductModel(
     id: '2',
@@ -59,6 +86,9 @@ final List<ProductModel> mockProducts = [
     price: '\$265',
     imageUrl:
     'https://images.unsplash.com/photo-1520975954732-35dd22299614?q=80&w=800',
+    imageUrls: const [
+      'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800',
+    ],
     imageHeight: 300,
     category: 'Outerwear',
     postedByName: 'Mia Santos',
@@ -75,8 +105,6 @@ final List<ProductModel> mockProducts = [
     imageHeight: 260,
     category: 'Suits',
     personVisible: true,
-    // No postedByName — simulates a visible person with no linked social
-    // account yet (tag will still show since it only checks personVisible).
   ),
   ProductModel(
     id: '4',
@@ -88,7 +116,7 @@ final List<ProductModel> mockProducts = [
     category: 'Knitwear',
     postedByName: 'Theo Brandt',
     instagramHandle: 'theobrandt',
-    personVisible: false, // flat-lay style shot, no person in frame
+    personVisible: false,
   ),
   ProductModel(
     id: '5',
@@ -99,6 +127,7 @@ final List<ProductModel> mockProducts = [
     imageHeight: 280,
     category: 'Outerwear',
     personVisible: true,
+    inStock: false,
   ),
   ProductModel(
     id: '6',
@@ -111,6 +140,7 @@ final List<ProductModel> mockProducts = [
     postedByName: 'Aura Studio',
     instagramHandle: 'aura.studio',
     facebookUrl: 'https://facebook.com/aurastudio',
-    personVisible: false, // product/studio shot, no model
+    personVisible: false,
+    badge: 'LIMITED',
   ),
 ];

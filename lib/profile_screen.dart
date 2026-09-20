@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'user_model.dart';
 import 'order_history_screen.dart';
 import 'help_centre_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -244,9 +245,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.settings_outlined,
             label: 'Settings',
             onTap: () {
-              // TODO: build out a real settings screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings coming soon')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),

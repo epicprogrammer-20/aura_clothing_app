@@ -10,6 +10,9 @@ import 'profile_screen.dart';
 import 'notifications_screen.dart';
 import 'category_products_screen.dart';
 import 'shop_screen.dart';
+import 'cart_service.dart';
+import 'cart_screen.dart';
+import 'currency_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +24,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _navIndex = 0;
   final PageController _bannerController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    CurrencyService.instance.detectFromLocationOrLocale();
+  }
 
   @override
   void dispose() {
@@ -141,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -173,21 +182,60 @@ class _HomeScreenState extends State<HomeScreen> {
                 letterSpacing: 3,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                // TODO: open cart screen
+            AnimatedBuilder(
+              animation: CartService.instance,
+              builder: (context, _) {
+                final itemCount = CartService.instance.itemCount;
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartScreen()),
+                    );
+                  },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: const Icon(Icons.shopping_cart_outlined,
+                            color: Colors.black, size: 20),
+                      ),
+                      if (itemCount > 0)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              itemCount > 9 ? '9+' : '$itemCount',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
               },
-              child: Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: const Icon(Icons.shopping_cart_outlined,
-                    color: Colors.black, size: 20),
-              ),
             ),
           ],
         ),
@@ -307,8 +355,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Horizontal scroll of colored image cards — matches the Shop screen's
-  // card style so Home and Shop feel consistent.
   Widget _buildCategoriesRow() {
     return SizedBox(
       height: 90,
@@ -316,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: mockCategories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final category = mockCategories[index];
           return SizedBox(
@@ -386,11 +432,6 @@ class _BestSellerCardState extends State<_BestSellerCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            product.price,
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 6),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -436,10 +477,28 @@ class _BestSellerCardState extends State<_BestSellerCard> {
                 child: Icon(
                   product.isWishlisted ? Icons.favorite : Icons.favorite_border,
                   size: 18,
-                  color: product.isWishlisted ? Colors.red : Colors.grey[400],
+                  color: product.isWishlisted ? Colors.pinkAccent : Colors.grey[400],
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          // Price now sits at the bottom of the card, bolder/bigger than
+          // before, and updates live when the person changes currency
+          // in Settings.
+          AnimatedBuilder(
+            animation: CurrencyService.instance,
+            builder: (context, _) {
+              return Text(
+                CurrencyService.instance.formatFromPriceString(product.price),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black,
+                  letterSpacing: -0.2,
+                ),
+              );
+            },
           ),
         ],
       ),

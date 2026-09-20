@@ -117,7 +117,7 @@ class OrderHistoryScreen extends StatelessWidget {
           : ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: mockOrders.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 14),
+        separatorBuilder: (_, _) => const SizedBox(height: 14),
         itemBuilder: (context, index) {
           return _OrderCard(order: mockOrders[index]);
         },

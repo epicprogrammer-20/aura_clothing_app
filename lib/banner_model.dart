@@ -37,7 +37,7 @@ final List<BannerModel> mockBanners = [
     buttonLabel: 'Get Now',
     imageUrl:
     'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800',
-    backgroundColor: const Color(0xFFFCE4D6),
+    backgroundColor: const Color(0xFF415A7E),
   ),
   BannerModel(
     id: 'banner2',

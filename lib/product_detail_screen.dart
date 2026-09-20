@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'product_model.dart';
+import 'cart_service.dart';
+import 'currency_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
@@ -16,13 +19,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String _selectedSize = 'M';
   final List<String> _sizes = ['XS', 'S', 'M', 'L', 'XL'];
 
-  // NEW: controls whether the "worn by [product]" tag is visible over
-  // the hero image. Starts hidden — tapping the image toggles it, same
-  // interaction pattern as TikTok's "Find Similar" reveal.
   bool _showProductTag = false;
 
+  final PageController _imageController = PageController();
+  int _currentImageIndex = 0;
+
+  @override
+  void dispose() {
+    _imageController.dispose();
+    super.dispose();
+  }
+
   void _addToCart() {
-    // TODO: hook up to real cart state/backend
+    CartService.instance.addItem(
+      widget.product,
+      _selectedSize,
+      widget.product.colors.first,
+    );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${widget.product.title} (size $_selectedSize) added to cart'),
@@ -52,6 +65,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final product = widget.product;
     final size = MediaQuery.sizeOf(context);
+    final images = product.allImages;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -61,33 +75,73 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             slivers: [
               SliverToBoxAdapter(
                 child: GestureDetector(
-                  // NEW: tapping the hero image toggles the tag overlay.
-                  // Only meaningful when a person is actually visible in
-                  // this photo — otherwise tapping does nothing.
                   onTap: product.personVisible
                       ? () => setState(() => _showProductTag = !_showProductTag)
                       : null,
                   child: Stack(
                     children: [
-                      Hero(
-                        tag: 'product_${product.id}',
-                        child: Image.network(
-                          product.imageUrl,
-                          width: double.infinity,
-                          height: size.height * 0.55,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            height: size.height * 0.55,
-                            color: Colors.grey[200],
-                            child: Icon(Icons.image_outlined,
-                                size: 60, color: Colors.grey[400]),
-                          ),
+                      SizedBox(
+                        height: size.height * 0.55,
+                        child: PageView.builder(
+                          controller: _imageController,
+                          itemCount: images.length,
+                          onPageChanged: (index) =>
+                              setState(() => _currentImageIndex = index),
+                          itemBuilder: (context, index) {
+                            final img = Image.network(
+                              images[index],
+                              width: double.infinity,
+                              height: size.height * 0.55,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                height: size.height * 0.55,
+                                color: Colors.grey[200],
+                                child: Icon(Icons.image_outlined,
+                                    size: 60, color: Colors.grey[400]),
+                              ),
+                            );
+                            return index == 0
+                                ? Hero(tag: 'product_${product.id}', child: img)
+                                : img;
+                          },
                         ),
                       ),
-
-                      // NEW: the tag pill itself — hovers on top of the
-                      // image, only when toggled on and a person is
-                      // visible in the photo.
+                      if (images.length > 1)
+                        Positioned(
+                          bottom: 16,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: SmoothPageIndicator(
+                                controller: _imageController,
+                                count: images.length,
+                                effect: const WormEffect(
+                                  dotHeight: 6,
+                                  dotWidth: 6,
+                                  spacing: 6,
+                                  activeDotColor: Colors.white,
+                                  dotColor: Colors.white38,
+                                ),
+                                onDotClicked: (index) {
+                                  _imageController.animateToPage(
+                                    index,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
                       if (product.personVisible && _showProductTag)
                         Positioned(
                           left: 0,
@@ -100,7 +154,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.75),
+                                color: Colors.black.withValues(alpha: 0.75),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
@@ -161,12 +215,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        product.price,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                      AnimatedBuilder(
+                        animation: CurrencyService.instance,
+                        builder: (context, _) => Text(
+                          CurrencyService.instance.formatFromPriceString(product.price),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black,
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ),
 
@@ -237,7 +295,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
 
-                      // Worn by / social links — plain text, no card
                       if (product.postedByName != null) ...[
                         const SizedBox(height: 28),
                         _buildPostedBySection(product),
@@ -249,7 +306,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
 
-          // Back + wishlist buttons over the image
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -272,7 +328,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
 
-          // Sticky bottom bar: Add to Cart
           Positioned(
             left: 0,
             right: 0,
@@ -285,7 +340,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 12,
                     offset: const Offset(0, -4),
                   ),
@@ -350,7 +405,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           boxShadow: backgroundColor == null
               ? [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 6,
             ),
           ]

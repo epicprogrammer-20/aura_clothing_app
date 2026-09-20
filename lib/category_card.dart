@@ -19,10 +19,22 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Container can't literally size itself to double.infinity — when a
+    // caller (e.g. a GridView cell) passes it, that means "fill whatever
+    // bounded height the parent already gives me," not "grow forever."
+    // The parent's tight constraints (from GridView/SizedBox) still apply
+    // even when we pass null here.
+    final bool fillParentHeight = height.isInfinite;
+
+    // The decorative image width was previously derived from `height`.
+    // When height is unbounded we don't have a number to derive from,
+    // so fall back to a fixed width that matches the original proportions.
+    final double imageWidth = fillParentHeight ? 100 : height * 0.9;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: height,
+        height: fillParentHeight ? null : height,
         width: double.infinity,
         decoration: BoxDecoration(
           color: category.backgroundColor,
@@ -35,7 +47,7 @@ class CategoryCard extends StatelessWidget {
               right: -10,
               bottom: 0,
               top: 0,
-              width: height * 0.9,
+              width: imageWidth,
               child: Image.network(
                 category.imageUrl,
                 fit: BoxFit.cover,

@@ -51,4 +51,11 @@ final List<CategoryModel> mockCategories = [
     'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=400',
     icon: Icons.watch_outlined,
   ),
+  CategoryModel(
+    label: 'Headwear',
+    backgroundColor: const Color(0xFF5A7A6D),
+    imageUrl:
+    'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?q=80&w=400',
+    icon: Icons.trending_up_outlined,
+  ),
 ];

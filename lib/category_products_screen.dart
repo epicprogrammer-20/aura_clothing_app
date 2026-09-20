@@ -3,19 +3,13 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'category_model.dart';
 import 'product_model.dart';
 import 'product_detail_screen.dart';
+import 'currency_service.dart';
 
 class CategoryProductsScreen extends StatelessWidget {
   final CategoryModel category;
 
   const CategoryProductsScreen({super.key, required this.category});
 
-  // Matches products whose `category` field equals this category's label.
-  // NOTE: mock products currently use categories like "Outerwear"/"Suits"/
-  // "Knitwear", while mockCategories uses "Shirts"/"Hoodies"/"Caps"/"Shorts"
-  // — so most categories will show empty right now. This is expected with
-  // placeholder data; once real products are added with matching category
-  // values, results will populate automatically. No code change needed
-  // later, just real data.
   List<ProductModel> get _matchingProducts {
     return mockProducts
         .where((p) => p.category.toLowerCase() == category.label.toLowerCase())
@@ -126,25 +120,23 @@ class _ProductCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  product.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
-                ),
+          Text(
+            product.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, color: Colors.black87),
+          ),
+          const SizedBox(height: 2),
+          AnimatedBuilder(
+            animation: CurrencyService.instance,
+            builder: (context, _) => Text(
+              CurrencyService.instance.formatFromPriceString(product.price),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: Colors.black,
               ),
-              Text(
-                product.price,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

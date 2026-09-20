@@ -42,7 +42,7 @@ class HelpCentreScreen extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _faqs.length,
-        separatorBuilder: (_, __) => Divider(color: Colors.grey[200]),
+        separatorBuilder: (_, _) => Divider(color: Colors.grey[200]),
         itemBuilder: (context, index) {
           final faq = _faqs[index];
           return ExpansionTile(

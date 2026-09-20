@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'product_model.dart';
 import 'product_detail_screen.dart';
+import 'currency_service.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -53,6 +54,10 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
+  // Raw USD numeric value — used for filtering/comparison only.
+  // Display labels are formatted separately via CurrencyService so the
+  // person sees their selected currency, while filtering logic stays
+  // consistent against the underlying USD mock data.
   double _parsePrice(String price) {
     final numeric = price.replaceAll(RegExp(r'[^0-9.]'), '');
     return double.tryParse(numeric) ?? 0;
@@ -292,9 +297,13 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          '\$${_selectedPriceRange.start.round()} - \$${_selectedPriceRange.end.round()}',
-                          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        AnimatedBuilder(
+                          animation: CurrencyService.instance,
+                          builder: (context, _) => Text(
+                            '${CurrencyService.instance.format(_selectedPriceRange.start)} - '
+                                '${CurrencyService.instance.format(_selectedPriceRange.end)}',
+                            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                          ),
                         ),
                         RangeSlider(
                           values: _selectedPriceRange,
@@ -304,8 +313,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           activeColor: Colors.black,
                           inactiveColor: Colors.grey[300],
                           labels: RangeLabels(
-                            '\$${_selectedPriceRange.start.round()}',
-                            '\$${_selectedPriceRange.end.round()}',
+                            CurrencyService.instance.format(_selectedPriceRange.start),
+                            CurrencyService.instance.format(_selectedPriceRange.end),
                           ),
                           onChanged: (values) {
                             setDrawerState(() {
@@ -452,48 +461,29 @@ class _ProductCard extends StatelessWidget {
           ),
         );
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Hero(
-              tag: 'product_${product.id}',
-              child: Image.network(
-                product.imageUrl,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Hero(
+          tag: 'product_${product.id}',
+          child: Image.network(
+            product.imageUrl,
+            height: product.imageHeight,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return Container(
                 height: product.imageHeight,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Container(
-                    height: product.imageHeight,
-                    color: Colors.grey[200],
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: product.imageHeight,
-                  color: Colors.grey[200],
-                  child: Icon(Icons.image_outlined, color: Colors.grey[400]),
-                ),
-              ),
+                color: Colors.grey[200],
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
+              height: product.imageHeight,
+              color: Colors.grey[200],
+              child: Icon(Icons.image_outlined, color: Colors.grey[400]),
             ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  product.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
-                ),
-              ),
-              Icon(Icons.more_horiz, size: 16, color: Colors.grey[500]),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
