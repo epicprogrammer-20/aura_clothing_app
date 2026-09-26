@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'product_model.dart';
-import 'product_detail_screen.dart';
-import 'currency_service.dart';
+import 'search_product_preview_screen.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  final String? initialQuery;
+  const SearchScreen({super.key, this.initialQuery});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -42,6 +42,12 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      _searchQuery = widget.initialQuery!;
+      _searchController.text = widget.initialQuery!;
+    }
+
     final prices = mockProducts.map((p) => _parsePrice(p.price)).toList();
     _priceFloor = prices.reduce((a, b) => a < b ? a : b);
     _priceCeiling = prices.reduce((a, b) => a > b ? a : b);
@@ -54,10 +60,6 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  // Raw USD numeric value — used for filtering/comparison only.
-  // Display labels are formatted separately via CurrencyService so the
-  // person sees their selected currency, while filtering logic stays
-  // consistent against the underlying USD mock data.
   double _parsePrice(String price) {
     final numeric = price.replaceAll(RegExp(r'[^0-9.]'), '');
     return double.tryParse(numeric) ?? 0;
@@ -297,13 +299,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        AnimatedBuilder(
-                          animation: CurrencyService.instance,
-                          builder: (context, _) => Text(
-                            '${CurrencyService.instance.format(_selectedPriceRange.start)} - '
-                                '${CurrencyService.instance.format(_selectedPriceRange.end)}',
-                            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                          ),
+                        Text(
+                          '\$${_selectedPriceRange.start.round()} - \$${_selectedPriceRange.end.round()}',
+                          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                         ),
                         RangeSlider(
                           values: _selectedPriceRange,
@@ -313,8 +311,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           activeColor: Colors.black,
                           inactiveColor: Colors.grey[300],
                           labels: RangeLabels(
-                            CurrencyService.instance.format(_selectedPriceRange.start),
-                            CurrencyService.instance.format(_selectedPriceRange.end),
+                            '\$${_selectedPriceRange.start.round()}',
+                            '\$${_selectedPriceRange.end.round()}',
                           ),
                           onChanged: (values) {
                             setDrawerState(() {
@@ -457,7 +455,7 @@ class _ProductCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+            builder: (context) => SearchProductPreviewScreen(product: product),
           ),
         );
       },

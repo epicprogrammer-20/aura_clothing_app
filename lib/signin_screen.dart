@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
+import 'auth_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -56,10 +57,12 @@ class _SignInScreenState extends State<SignInScreen>
     if (!mounted) return;
     setState(() => _isLoading = false);
 
+    AuthService.instance.login();
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const HomeScreen()
+          builder: (context) => const HomeScreen()
       ),
     );
   }
@@ -68,6 +71,16 @@ class _SignInScreenState extends State<SignInScreen>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SignUpScreen()),
+    );
+  }
+
+  // Lets the person continue without signing in. AuthService.isLoggedIn
+  // stays false, so wishlist/cart actions and the Profile screen will
+  // still prompt for login later, via requireLogin().
+  void _skipForNow() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 
@@ -317,6 +330,30 @@ class _SignInScreenState extends State<SignInScreen>
                               ..onTap = _goToSignUp,
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Skip — noticeable, full-width, bottom of the flow
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: _skipForNow,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey[400]!),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                      ),
+                      child: Text(
+                        'SKIP FOR NOW',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
                   ),

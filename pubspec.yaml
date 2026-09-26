@@ -40,6 +40,7 @@ dependencies:
   url_launcher: ^6.3.1
   font_awesome_flutter: ^11.0.0
   share_plus: ^10.1.2
+  iconsax_flutter: ^1.0.0
 
 
 
@@ -64,6 +65,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/aura_logo.png
+    - assets/images/Delivery_Van_Mockup_1.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

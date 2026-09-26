@@ -5,6 +5,11 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'product_model.dart';
 import 'cart_service.dart';
 import 'currency_service.dart';
+import 'auth_service.dart';
+import 'search_screen.dart';
+import 'size_guide_screen.dart';
+import 'review_model.dart';
+import 'app_colors.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
@@ -31,6 +36,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _addToCart() {
+    if (!requireLogin(context, message: 'Log in to add items to your cart')) return;
+
     CartService.instance.addItem(
       widget.product,
       _selectedSize,
@@ -46,6 +53,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _toggleWishlist() {
+    if (!requireLogin(context, message: 'Log in to save items to your wishlist')) return;
+
     setState(() {
       widget.product.isWishlisted = !widget.product.isWishlisted;
     });
@@ -59,6 +68,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         const SnackBar(content: Text('Could not open that link')),
       );
     }
+  }
+
+  void _searchForTag() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SearchScreen(initialQuery: widget.product.title),
+      ),
+    );
   }
 
   @override
@@ -148,40 +166,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           right: 0,
                           top: size.height * 0.28,
                           child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.75),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.local_offer_outlined,
-                                    size: 14,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: size.width * 0.6,
+                            child: GestureDetector(
+                              onTap: _searchForTag,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.75),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.local_offer_outlined,
+                                      size: 14,
+                                      color: Colors.white,
                                     ),
-                                    child: Text(
-                                      product.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
+                                    const SizedBox(width: 6),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: size.width * 0.6,
+                                      ),
+                                      child: Text(
+                                        product.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -252,10 +273,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: isSelected ? Colors.black : Colors.white,
+                                  color: isSelected ? AppColors.accent : Colors.white,
                                   border: Border.all(
                                     color: isSelected
-                                        ? Colors.black
+                                        ? AppColors.accent
                                         : Colors.grey[300]!,
                                   ),
                                 ),
@@ -271,6 +292,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           );
                         }).toList(),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => SizeGuideSheet.show(context),
+                        child: const Text(
+                          'Size Guide',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.accent,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: AppColors.accent,
+                          ),
+                        ),
                       ),
 
                       const SizedBox(height: 24),
@@ -299,6 +334,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         const SizedBox(height: 28),
                         _buildPostedBySection(product),
                       ],
+
+                      const SizedBox(height: 28),
+                      _buildReviewsSection(product),
                     ],
                   ),
                 ),
@@ -363,7 +401,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: ElevatedButton(
                         onPressed: _addToCart,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor: AppColors.accent,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -482,6 +520,93 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               decoration: TextDecoration.underline,
               decorationColor: Colors.black38,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsSection(ProductModel product) {
+    final reviews = reviewsFor(product.id);
+    final avg = averageRating(reviews);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Reviews',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            if (reviews.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.star, size: 14, color: Colors.amber.shade700),
+              const SizedBox(width: 2),
+              Text(
+                '${avg.toStringAsFixed(1)} (${reviews.length})',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (reviews.isEmpty)
+          Text(
+            'No reviews yet.',
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+          )
+        else
+          ...reviews.map((r) => _reviewTile(r)),
+      ],
+    );
+  }
+
+  Widget _reviewTile(ReviewModel review) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                review.reviewerName,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                review.date,
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: List.generate(5, (i) {
+              return Icon(
+                i < review.rating.round() ? Icons.star : Icons.star_border,
+                size: 13,
+                color: Colors.amber.shade700,
+              );
+            }),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            review.comment,
+            style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700, height: 1.4),
           ),
         ],
       ),

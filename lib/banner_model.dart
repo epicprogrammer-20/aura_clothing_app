@@ -58,4 +58,13 @@ final List<BannerModel> mockBanners = [
     backgroundColor: const Color(0xFFE8E4F0),
     isActive: false, // example of a banner an admin has switched off
   ),
+  BannerModel(
+    id: 'banner4',
+    title: "Don't miss out —",
+    subtitle: 'Save up to 50% on your favorite products.',
+    buttonLabel: 'Shop Now',
+    imageUrl:
+    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800',
+    backgroundColor: const Color(0xFF1B2A4A),
+  ),
 ];

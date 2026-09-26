@@ -7,6 +7,10 @@ import 'product_model.dart';
 import 'cart_service.dart';
 import 'product_detail_screen.dart';
 import 'currency_service.dart';
+import 'auth_service.dart';
+import 'app_colors.dart';
+import 'banner_model.dart';
+import 'promo_banner_carousel.dart';
 
 const List<String> kShopProductFilters = [
   'All',
@@ -192,6 +196,14 @@ class _ShopScreenState extends State<ShopScreen> {
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: PromoBannerCarousel(
+                  banners: mockBanners.where((b) => b.isActive).toList(),
+                ),
+              ),
+            ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
               sliver: SliverToBoxAdapter(
@@ -234,10 +246,10 @@ class _ShopScreenState extends State<ShopScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 18),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.black : Colors.white,
+                color: isSelected ? AppColors.accent : Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isSelected ? Colors.black : Colors.grey.shade300,
+                  color: isSelected ? AppColors.accent : Colors.grey.shade300,
                 ),
               ),
               child: Text(
@@ -319,6 +331,7 @@ class _ShopScreenState extends State<ShopScreen> {
             return _ProductCard(
               product: product,
               onWishlistToggle: () {
+                if (!requireLogin(context, message: 'Log in to save items to your wishlist')) return;
                 setState(() => product.isWishlisted = !product.isWishlisted);
               },
               onTap: () {
@@ -394,6 +407,8 @@ class _ProductCardState extends State<_ProductCard> {
   bool _hovering = false;
 
   void _quickAdd(BuildContext context) {
+    if (!requireLogin(context, message: 'Log in to add items to your cart')) return;
+
     final product = widget.product;
     String? selectedSize;
 
@@ -456,9 +471,9 @@ class _ProductCardState extends State<_ProductCard> {
                             height: 40,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: isSelected ? Colors.black : Colors.white,
+                              color: isSelected ? AppColors.accent : Colors.white,
                               border: Border.all(
-                                color: isSelected ? Colors.black : Colors.grey.shade300,
+                                color: isSelected ? AppColors.accent : Colors.grey.shade300,
                               ),
                               borderRadius: BorderRadius.circular(4),
                             ),
@@ -480,7 +495,7 @@ class _ProductCardState extends State<_ProductCard> {
                       height: 48,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor: AppColors.accent,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
@@ -563,7 +578,7 @@ class _ProductCardState extends State<_ProductCard> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: product.badge == 'NEW' ? Colors.black : Colors.white,
+                          color: product.badge == 'NEW' ? AppColors.accent : Colors.white,
                           border: product.badge == 'LIMITED'
                               ? Border.all(color: Colors.black)
                               : null,
@@ -695,7 +710,7 @@ class _QuickAddButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: enabled ? Colors.black : Colors.grey.shade300,
+          color: enabled ? AppColors.accent : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(2),
         ),
         child: Text(
@@ -779,7 +794,7 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                     min: 0,
                     max: 3000,
                     divisions: 30,
-                    activeColor: Colors.black,
+                    activeColor: AppColors.accent,
                     inactiveColor: Colors.grey.shade300,
                     labels: RangeLabels(
                       '\$${_priceRange.start.round()}',
@@ -801,9 +816,9 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: selected ? Colors.black : Colors.white,
+                            color: selected ? AppColors.accent : Colors.white,
                             border: Border.all(
-                              color: selected ? Colors.black : Colors.grey.shade300,
+                              color: selected ? AppColors.accent : Colors.grey.shade300,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -837,7 +852,7 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                             color: color,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: selected ? Colors.black : Colors.grey.shade300,
+                              color: selected ? AppColors.accent : Colors.grey.shade300,
                               width: selected ? 2 : 1,
                             ),
                           ),
@@ -849,7 +864,7 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                   _sectionTitle('Availability'),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    activeColor: Colors.black,
+                    activeColor: AppColors.accent,
                     title: const Text(
                       'In Stock Only',
                       style: TextStyle(fontSize: 13, color: Colors.black),
@@ -888,7 +903,7 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                     flex: 2,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: AppColors.accent,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),

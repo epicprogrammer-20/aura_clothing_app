@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'cart_service.dart';
-import 'product_model.dart';
 import 'shop_screen.dart';
 import 'currency_service.dart';
+import 'checkout_screen.dart';
+import 'app_colors.dart';
 
 const double _kTaxRate = 0.10;
 
@@ -212,9 +213,9 @@ class _CartItemTileState extends State<_CartItemTile> {
   }
 
   String _colorName(Color color) {
-    if (color.value == Colors.black.value) return 'Black';
-    if (color.value == Colors.white.value) return 'White';
-    if (color.value == Colors.grey.value) return 'Grey';
+    if (color.toARGB32() == Colors.black.toARGB32()) return 'Black';
+    if (color.toARGB32() == Colors.white.toARGB32()) return 'White';
+    if (color.toARGB32() == Colors.grey.value) return 'Grey';
     return 'Multi';
   }
 
@@ -257,7 +258,7 @@ class _CartItemTileState extends State<_CartItemTile> {
                   child: Image.network(
                     product.imageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(
+                    errorBuilder: (_, _, _) => Icon(
                       Icons.image_outlined,
                       color: Colors.grey.shade400,
                     ),
@@ -630,7 +631,7 @@ class _PromoCodeSection extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(color: Colors.black),
+                        borderSide: const BorderSide(color: AppColors.accent),
                       ),
                     ),
                   ),
@@ -640,7 +641,7 @@ class _PromoCodeSection extends StatelessWidget {
                   height: 40,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.black),
+                      side: const BorderSide(color: AppColors.accent),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -659,7 +660,7 @@ class _PromoCodeSection extends StatelessWidget {
                     },
                     child: const Text(
                       'Apply',
-                      style: TextStyle(fontSize: 12, color: Colors.black),
+                      style: TextStyle(fontSize: 12, color: AppColors.accent),
                     ),
                   ),
                 ),
@@ -697,7 +698,7 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
           height: 52,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -705,7 +706,10 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
               ),
             ),
             onPressed: () {
-              // TODO: hook up to real checkout flow
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+              );
             },
             child: const Text(
               'CHECKOUT →',
@@ -747,7 +751,7 @@ class _MobileCheckoutBar extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: AppColors.accent,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -755,7 +759,10 @@ class _MobileCheckoutBar extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // TODO: hook up to real checkout flow
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                  );
                 },
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
@@ -832,7 +839,7 @@ class _EmptyCartView extends StatelessWidget {
             const SizedBox(height: 28),
             OutlinedButton(
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.black),
+                side: const BorderSide(color: AppColors.accent),
                 padding:
                 const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -851,7 +858,7 @@ class _EmptyCartView extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1,
-                  color: Colors.black,
+                  color: AppColors.accent,
                 ),
               ),
             ),

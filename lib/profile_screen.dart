@@ -4,7 +4,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'user_model.dart';
 import 'order_history_screen.dart';
 import 'help_centre_screen.dart';
+import 'privacy_policy_screen.dart';
 import 'settings_screen.dart';
+import 'auth_service.dart';
+import 'signin_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -25,10 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout() {
-    // TODO: hook up to real auth/session clearing once backend is wired up
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Logged out (placeholder)')),
-    );
+    AuthService.instance.logout();
   }
 
   void _editLinkedAccounts() {
@@ -121,144 +121,214 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
-        children: [
-          // Avatar (initials), name, bio
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Column(
-              children: [
-                // Initials avatar — first letter of the name. Once auth
-                // exists, `_user.name` comes from whichever provider the
-                // person logged in with (email, Google, Apple).
-                CircleAvatar(
-                  radius: 44,
-                  backgroundColor: Colors.black,
-                  child: Text(
-                    _user.initials,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _user.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _user.bio,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Linked accounts
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Wrap(
-                    spacing: 16,
-                    children: [
-                      if (_user.instagramHandle != null)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const FaIcon(FontAwesomeIcons.instagram,
-                                size: 14, color: Colors.black87),
-                            const SizedBox(width: 6),
-                            Text('@${_user.instagramHandle}',
-                                style: const TextStyle(fontSize: 13)),
-                          ],
-                        ),
-                      if (_user.facebookUrl != null)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            FaIcon(FontAwesomeIcons.facebook,
-                                size: 14, color: Colors.black87),
-                            SizedBox(width: 6),
-                            Text('Facebook linked', style: TextStyle(fontSize: 13)),
-                          ],
-                        ),
-                      if (_user.instagramHandle == null && _user.facebookUrl == null)
-                        Text(
-                          'No linked accounts',
-                          style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                        ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.black),
-                  onPressed: _editLinkedAccounts,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-          Divider(color: Colors.grey[200], thickness: 6),
-
-          // Account menu
-          _menuRow(
-            icon: Icons.receipt_long_outlined,
-            label: 'Order History',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const OrderHistoryScreen()),
-              );
-            },
-          ),
-          _menuRow(
-            icon: Icons.help_outline,
-            label: 'Help Centre',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HelpCentreScreen()),
-              );
-            },
-          ),
-          _menuRow(
-            icon: Icons.person_add_alt_outlined,
-            label: 'Invite a Friend',
-            onTap: _shareInvite,
-          ),
-          _menuRow(
-            icon: Icons.settings_outlined,
-            label: 'Settings',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
-          _menuRow(
-            icon: Icons.logout,
-            label: 'Log Out',
-            onTap: _logout,
-            isDestructive: true,
-          ),
-        ],
+      body: AnimatedBuilder(
+        animation: AuthService.instance,
+        builder: (context, _) {
+          if (!AuthService.instance.isLoggedIn) {
+            return _buildLoggedOutState();
+          }
+          return _buildProfileContent();
+        },
       ),
+    );
+  }
+
+  Widget _buildLoggedOutState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.person_outline, size: 56, color: Colors.grey.shade300),
+            const SizedBox(height: 20),
+            const Text(
+              'Log in to view your profile',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'See your orders, saved items, and account details once you\'re signed in.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignInScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Text(
+                  'LOG IN',
+                  style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileContent() {
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 32),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 44,
+                backgroundColor: Colors.black,
+                child: Text(
+                  _user.initials,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _user.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _user.bio,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Wrap(
+                  spacing: 16,
+                  children: [
+                    if (_user.instagramHandle != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const FaIcon(FontAwesomeIcons.instagram,
+                              size: 14, color: Colors.black87),
+                          const SizedBox(width: 6),
+                          Text('@${_user.instagramHandle}',
+                              style: const TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    if (_user.facebookUrl != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          FaIcon(FontAwesomeIcons.facebook,
+                              size: 14, color: Colors.black87),
+                          SizedBox(width: 6),
+                          Text('Facebook linked', style: TextStyle(fontSize: 13)),
+                        ],
+                      ),
+                    if (_user.instagramHandle == null && _user.facebookUrl == null)
+                      Text(
+                        'No linked accounts',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.black),
+                onPressed: _editLinkedAccounts,
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 20),
+        Divider(color: Colors.grey[200], thickness: 6),
+
+        _menuRow(
+          icon: Icons.receipt_long_outlined,
+          label: 'My Orders',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OrderHistoryScreen()),
+            );
+          },
+        ),
+        _menuRow(
+          icon: Icons.help_outline,
+          label: 'Help Centre',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HelpCentreScreen()),
+            );
+          },
+        ),
+        _menuRow(
+          icon: Icons.privacy_tip_outlined,
+          label: 'Privacy Policy',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
+            );
+          },
+        ),
+        _menuRow(
+          icon: Icons.person_add_alt_outlined,
+          label: 'Invite a Friend',
+          onTap: _shareInvite,
+        ),
+        _menuRow(
+          icon: Icons.settings_outlined,
+          label: 'Settings',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          },
+        ),
+        _menuRow(
+          icon: Icons.logout,
+          label: 'Log Out',
+          onTap: _logout,
+          isDestructive: true,
+        ),
+      ],
     );
   }
 
