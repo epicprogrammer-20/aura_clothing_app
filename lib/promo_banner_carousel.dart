@@ -63,7 +63,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
                           width: 140,
                           child: ColorFiltered(
                             colorFilter: const ColorFilter.matrix(_kGrayscaleMatrix),
-                            child: Image.network(
+                            child: Image.asset(
                               banner.imageUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>

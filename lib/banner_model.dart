@@ -35,8 +35,7 @@ final List<BannerModel> mockBanners = [
     title: 'Get discounts on fashion day',
     subtitle: 'Up to 50%',
     buttonLabel: 'Get Now',
-    imageUrl:
-    'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800',
+    imageUrl: 'assets/images/banners/banner1.png',
     backgroundColor: const Color(0xFF415A7E),
   ),
   BannerModel(
@@ -44,8 +43,7 @@ final List<BannerModel> mockBanners = [
     title: 'New arrivals just dropped',
     subtitle: 'Shop the collection',
     buttonLabel: 'Explore',
-    imageUrl:
-    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800',
+    imageUrl: 'assets/images/banners/banner2.png',
     backgroundColor: const Color(0xFFE1E8F0),
   ),
   BannerModel(
@@ -53,8 +51,7 @@ final List<BannerModel> mockBanners = [
     title: 'Free shipping this weekend',
     subtitle: 'On all orders over \$50',
     buttonLabel: 'Learn More',
-    imageUrl:
-    'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800',
+    imageUrl: 'assets/images/banners/banner3.png',
     backgroundColor: const Color(0xFFE8E4F0),
     isActive: false, // example of a banner an admin has switched off
   ),
@@ -63,8 +60,7 @@ final List<BannerModel> mockBanners = [
     title: "Don't miss out —",
     subtitle: 'Save up to 50% on your favorite products.',
     buttonLabel: 'Shop Now',
-    imageUrl:
-    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800',
+    imageUrl: 'assets/images/banners/banner2.png',
     backgroundColor: const Color(0xFF1B2A4A),
   ),
 ];

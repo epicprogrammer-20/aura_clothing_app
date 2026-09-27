@@ -138,7 +138,7 @@ class OrderTrackingScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
+                child: Image.asset(
                   order.itemImageUrl,
                   width: 56,
                   height: 56,

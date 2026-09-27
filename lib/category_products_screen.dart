@@ -99,18 +99,11 @@ class _ProductCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Hero(
               tag: 'product_${product.id}',
-              child: Image.network(
+              child: Image.asset(
                 product.imageUrl,
                 height: product.imageHeight,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Container(
-                    height: product.imageHeight,
-                    color: Colors.grey[200],
-                  );
-                },
                 errorBuilder: (context, error, stackTrace) => Container(
                   height: product.imageHeight,
                   color: Colors.grey[200],

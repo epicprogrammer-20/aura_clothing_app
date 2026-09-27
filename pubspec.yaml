@@ -41,6 +41,9 @@ dependencies:
   font_awesome_flutter: ^11.0.0
   share_plus: ^10.1.2
   iconsax_flutter: ^1.0.0
+  flutter_svg: ^2.0.10+1
+  pdf: ^3.11.1
+  printing: ^5.13.1
 
 
 
@@ -68,6 +71,15 @@ flutter:
   assets:
     - assets/images/aura_logo.png
     - assets/images/Delivery_Van_Mockup_1.png
+    - assets/images/MasterCard.svg
+    - assets/images/paypal.svg
+    - assets/images/Gpay.svg
+    - assets/images/InnBucks.png
+    - assets/images/eco.png
+    - assets/images/products/
+    - assets/images/banners/
+    - assets/images/splashscreen/
+    - assets/images/models/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

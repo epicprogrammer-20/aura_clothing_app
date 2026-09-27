@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'product_model.dart';
+import 'deal_model.dart';
 import 'cart_service.dart';
 import 'currency_service.dart';
 import 'auth_service.dart';
@@ -14,7 +15,11 @@ import 'app_colors.dart';
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
 
-  const ProductDetailScreen({super.key, required this.product});
+  // Pass the active deal when this product was opened from the Deals
+  // screen, so the discounted price carries through to Add to Cart too.
+  final DealModel? deal;
+
+  const ProductDetailScreen({super.key, required this.product, this.deal});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -42,6 +47,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       widget.product,
       _selectedSize,
       widget.product.colors.first,
+      dealPrice: widget.deal?.discountedPrice,
     );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -82,6 +88,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    final deal = widget.deal;
     final size = MediaQuery.sizeOf(context);
     final images = product.allImages;
 
@@ -106,16 +113,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           onPageChanged: (index) =>
                               setState(() => _currentImageIndex = index),
                           itemBuilder: (context, index) {
-                            final img = Image.network(
-                              images[index],
+                            final img = Container(
                               width: double.infinity,
                               height: size.height * 0.55,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                height: size.height * 0.55,
-                                color: Colors.grey[200],
-                                child: Icon(Icons.image_outlined,
-                                    size: 60, color: Colors.grey[400]),
+                              color: Colors.grey[100],
+                              child: Image.asset(
+                                images[index],
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  height: size.height * 0.55,
+                                  color: Colors.grey[200],
+                                  child: Icon(Icons.image_outlined,
+                                      size: 60, color: Colors.grey[400]),
+                                ),
                               ),
                             );
                             return index == 0
@@ -217,14 +227,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        product.category.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          letterSpacing: 1,
-                          color: Colors.grey[500],
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              product.category.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                letterSpacing: 1,
+                                color: Colors.grey[500],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          if (deal != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade600,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '-${deal.discountPercent.toInt()}%',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -238,7 +270,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const SizedBox(height: 8),
                       AnimatedBuilder(
                         animation: CurrencyService.instance,
-                        builder: (context, _) => Text(
+                        builder: (context, _) => deal != null
+                            ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              CurrencyService.instance.format(product.priceValue),
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[500],
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              CurrencyService.instance.format(deal.discountedPrice),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                          ],
+                        )
+                            : Text(
                           CurrencyService.instance.formatFromPriceString(product.price),
                           style: const TextStyle(
                             fontSize: 22,

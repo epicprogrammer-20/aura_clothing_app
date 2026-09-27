@@ -15,15 +15,6 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  bool _promoExpanded = false;
-  final TextEditingController _promoController = TextEditingController();
-
-  @override
-  void dispose() {
-    _promoController.dispose();
-    super.dispose();
-  }
-
   void _removeItem(CartItem item) {
     CartService.instance.removeItem(item);
   }
@@ -102,10 +93,6 @@ class _CartScreenState extends State<CartScreen> {
                 subtotal: subtotal,
                 tax: tax,
                 total: total,
-                promoExpanded: _promoExpanded,
-                promoController: _promoController,
-                onTogglePromo: () =>
-                    setState(() => _promoExpanded = !_promoExpanded),
               ),
             ),
           ),
@@ -144,10 +131,6 @@ class _CartScreenState extends State<CartScreen> {
                   subtotal: subtotal,
                   tax: tax,
                   total: total,
-                  promoExpanded: _promoExpanded,
-                  promoController: _promoController,
-                  onTogglePromo: () =>
-                      setState(() => _promoExpanded = !_promoExpanded),
                   showCheckoutButton: false,
                 ),
                 const SizedBox(height: 100),
@@ -255,7 +238,7 @@ class _CartItemTileState extends State<_CartItemTile> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: Image.network(
+                  child: Image.asset(
                     product.imageUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) => Icon(
@@ -315,15 +298,36 @@ class _CartItemTileState extends State<_CartItemTile> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        CurrencyService.instance
-                            .formatFromPriceString(product.price),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black,
-                        ),
+                      AnimatedBuilder(
+                        animation: CurrencyService.instance,
+                        builder: (context, _) {
+                          final hasDeal = widget.item.dealPrice != null;
+                          return Row(
+                            children: [
+                              if (hasDeal) ...[
+                                Text(
+                                  CurrencyService.instance.format(product.priceValue),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              Text(
+                                CurrencyService.instance.format(widget.item.unitPrice),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
+
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -453,18 +457,12 @@ class _OrderSummaryPanel extends StatelessWidget {
   final double subtotal;
   final double tax;
   final double total;
-  final bool promoExpanded;
-  final TextEditingController promoController;
-  final VoidCallback onTogglePromo;
   final bool showCheckoutButton;
 
   const _OrderSummaryPanel({
     required this.subtotal,
     required this.tax,
     required this.total,
-    required this.promoExpanded,
-    required this.promoController,
-    required this.onTogglePromo,
     this.showCheckoutButton = true,
   });
 
@@ -525,12 +523,6 @@ class _OrderSummaryPanel extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          _PromoCodeSection(
-            expanded: promoExpanded,
-            controller: promoController,
-            onToggle: onTogglePromo,
-          ),
           if (showCheckoutButton) ...[
             const SizedBox(height: 24),
             _CheckoutButton(total: total),
@@ -554,118 +546,6 @@ class _OrderSummaryPanel extends StatelessWidget {
             fontSize: 13,
             fontWeight: isMuted ? FontWeight.w400 : FontWeight.w600,
             color: isMuted ? Colors.grey.shade500 : Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PromoCodeSection extends StatelessWidget {
-  final bool expanded;
-  final TextEditingController controller;
-  final VoidCallback onToggle;
-
-  const _PromoCodeSection({
-    required this.expanded,
-    required this.controller,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: onToggle,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Have a promo code?',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              AnimatedRotation(
-                turns: expanded ? 0.5 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: const Icon(Icons.keyboard_arrow_down, size: 18),
-              ),
-            ],
-          ),
-        ),
-        AnimatedCrossFade(
-          duration: const Duration(milliseconds: 200),
-          crossFadeState:
-          expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          firstChild: const SizedBox(width: double.infinity),
-          secondChild: Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    style: const TextStyle(fontSize: 13, color: Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Enter promo code',
-                      hintStyle: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade400,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(color: AppColors.accent),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  height: 40,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.accent),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.black,
-                          behavior: SnackBarBehavior.floating,
-                          content: Text(
-                            'Promo code applied',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Apply',
-                      style: TextStyle(fontSize: 12, color: AppColors.accent),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ],

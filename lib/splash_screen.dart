@@ -14,8 +14,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   static const List<String> _letters = ['A', 'U', 'R', 'A'];
 
-  // Each letter gets its own staggered slice of the controller's timeline,
-  // so they jump in sequence rather than all at once.
   late final List<Animation<double>> _jumpAnimations;
   late final List<Animation<double>> _fadeAnimations;
 
@@ -61,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to onboarding after a delay — unchanged from before.
+    // Navigate to the onboarding carousel after a delay.
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.pushReplacement(

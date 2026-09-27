@@ -104,8 +104,7 @@ class _DealsScreenState extends State<DealsScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-            // Placeholder image — swap for real banner art later.
-            child: Image.network(
+            child: Image.asset(
               _featuredDeal.product.imageUrl,
               fit: BoxFit.cover,
               color: Colors.black.withValues(alpha: 0.4),
@@ -169,7 +168,10 @@ class _DealsScreenState extends State<DealsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ProductDetailScreen(product: _featuredDeal.product),
+                        builder: (_) => ProductDetailScreen(
+                          product: _featuredDeal.product,
+                          deal: _featuredDeal,
+                        ),
                       ),
                     );
                   },
@@ -212,7 +214,9 @@ class _DealCardState extends State<_DealCard> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product, deal: deal),
+          ),
         );
       },
       child: Column(
@@ -226,7 +230,7 @@ class _DealCardState extends State<_DealCard> {
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     color: Colors.grey.shade100,
-                    child: Image.network(
+                    child: Image.asset(
                       product.imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) =>

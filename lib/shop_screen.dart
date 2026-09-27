@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'category_model.dart';
 import 'category_card.dart';
 import 'category_products_screen.dart';
-import 'search_screen.dart';
 import 'product_model.dart';
 import 'cart_service.dart';
 import 'product_detail_screen.dart';
@@ -45,8 +44,22 @@ class _ShopScreenState extends State<ShopScreen> {
   final Set<Color> _filterColors = {};
   bool _onlyInStock = false;
 
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   List<ProductModel> get _filteredProducts {
     var list = mockProducts.where((p) {
+      if (_searchQuery.isNotEmpty &&
+          !p.title.toLowerCase().contains(_searchQuery.toLowerCase())) {
+        return false;
+      }
       if (_selectedFilter == 'New Arrivals' && p.badge != 'NEW') return false;
       if (_selectedFilter != 'All' &&
           _selectedFilter != 'New Arrivals' &&
@@ -56,7 +69,7 @@ class _ShopScreenState extends State<ShopScreen> {
       if (p.priceValue < _priceRange.start || p.priceValue > _priceRange.end) return false;
       if (_filterSizes.isNotEmpty && !p.sizes.any(_filterSizes.contains)) return false;
       if (_filterColors.isNotEmpty &&
-          !p.colors.any((c) => _filterColors.any((fc) => fc.value == c.value))) {
+          !p.colors.any((c) => _filterColors.any((fc) => fc.toARGB32() == c.toARGB32()))) {
         return false;
       }
       if (_onlyInStock && !p.inStock) return false;
@@ -77,6 +90,18 @@ class _ShopScreenState extends State<ShopScreen> {
         break;
     }
     return list;
+  }
+
+  void _startSearch() {
+    setState(() => _isSearching = true);
+  }
+
+  void _stopSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchQuery = '';
+      _searchController.clear();
+    });
   }
 
   void _openSortMenu() async {
@@ -113,20 +138,34 @@ class _ShopScreenState extends State<ShopScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
-        title: const Text(
+        title: _isSearching
+            ? TextField(
+          controller: _searchController,
+          autofocus: true,
+          style: const TextStyle(color: Colors.black, fontSize: 16),
+          cursorColor: Colors.black,
+          decoration: InputDecoration(
+            hintText: 'Search products...',
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            border: InputBorder.none,
+          ),
+          onChanged: (value) => setState(() => _searchQuery = value),
+        )
+            : const Text(
           'Shop',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SearchScreen()),
-              );
-            },
-          ),
+          if (_isSearching)
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.black),
+              onPressed: _stopSearch,
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search, color: Colors.black),
+              onPressed: _startSearch,
+            ),
         ],
       ),
       endDrawer: _FilterDrawer(
@@ -151,64 +190,68 @@ class _ShopScreenState extends State<ShopScreen> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              sliver: SliverToBoxAdapter(
-                child: Text(
-                  'Defined by simplicity.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
-                    letterSpacing: 0.2,
+            if (!_isSearching) ...[
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Defined by simplicity.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                      letterSpacing: 0.2,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              sliver: SliverToBoxAdapter(
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: mockCategories.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1.5,
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                sliver: SliverToBoxAdapter(
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: mockCategories.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.5,
+                    ),
+                    itemBuilder: (context, index) {
+                      final category = mockCategories[index];
+                      return CategoryCard(
+                        category: category,
+                        height: double.infinity,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CategoryProductsScreen(category: category),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  itemBuilder: (context, index) {
-                    final category = mockCategories[index];
-                    return CategoryCard(
-                      category: category,
-                      height: double.infinity,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CategoryProductsScreen(category: category),
-                          ),
-                        );
-                      },
-                    );
-                  },
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: PromoBannerCarousel(
-                  banners: mockBanners.where((b) => b.isActive).toList(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: PromoBannerCarousel(
+                    banners: mockBanners.where((b) => b.isActive).toList(),
+                  ),
                 ),
               ),
-            ),
+            ],
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
               sliver: SliverToBoxAdapter(
                 child: Text(
-                  'All Products',
+                  _isSearching && _searchQuery.isNotEmpty
+                      ? 'Results for "$_searchQuery"'
+                      : 'All Products',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -235,7 +278,7 @@ class _ShopScreenState extends State<ShopScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: kShopProductFilters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final filter = kShopProductFilters[index];
           final isSelected = filter == _selectedFilter;
@@ -303,13 +346,15 @@ class _ShopScreenState extends State<ShopScreen> {
     final products = _filteredProducts;
 
     if (products.isEmpty) {
-      return const SliverToBoxAdapter(
+      return SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.only(top: 48),
+          padding: const EdgeInsets.only(top: 48),
           child: Center(
             child: Text(
-              'No products match your filters.',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              _isSearching && _searchQuery.isNotEmpty
+                  ? 'No products match "$_searchQuery".'
+                  : 'No products match your filters.',
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
           ),
         ),
@@ -560,10 +605,10 @@ class _ProductCardState extends State<_ProductCard> {
                       curve: Curves.easeOut,
                       child: Container(
                         color: Colors.grey.shade100,
-                        child: Image.network(
+                        child: Image.asset(
                           product.imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             color: Colors.grey.shade200,
                             child: const Icon(Icons.image_outlined, color: Colors.grey),
                           ),
@@ -619,7 +664,7 @@ class _ProductCardState extends State<_ProductCard> {
                       left: 0,
                       right: 0,
                       child: Container(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         alignment: Alignment.center,
                         child: const Text(
@@ -751,8 +796,8 @@ class _FilterDrawerState extends State<_FilterDrawer> {
   static const _allColors = [Colors.black, Colors.white, Colors.grey];
 
   late RangeValues _priceRange = widget.priceRange;
-  late Set<String> _sizes = {...widget.selectedSizes};
-  late Set<Color> _colors = {...widget.selectedColors};
+  late final Set<String> _sizes = {...widget.selectedSizes};
+  late final Set<Color> _colors = {...widget.selectedColors};
   late bool _inStock = widget.onlyInStock;
 
   @override
@@ -838,11 +883,11 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                   Wrap(
                     spacing: 10,
                     children: _allColors.map((color) {
-                      final selected = _colors.any((c) => c.value == color.value);
+                      final selected = _colors.any((c) => c.toARGB32() == color.toARGB32());
                       return GestureDetector(
                         onTap: () => setState(() {
                           selected
-                              ? _colors.removeWhere((c) => c.value == color.value)
+                              ? _colors.removeWhere((c) => c.toARGB32() == color.toARGB32())
                               : _colors.add(color);
                         }),
                         child: Container(
@@ -864,7 +909,7 @@ class _FilterDrawerState extends State<_FilterDrawer> {
                   _sectionTitle('Availability'),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    activeColor: AppColors.accent,
+                    activeThumbColor: AppColors.accent,
                     title: const Text(
                       'In Stock Only',
                       style: TextStyle(fontSize: 13, color: Colors.black),

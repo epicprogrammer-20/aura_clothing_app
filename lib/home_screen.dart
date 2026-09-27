@@ -12,6 +12,7 @@ import 'currency_service.dart';
 import 'auth_service.dart';
 import 'deals_screen.dart';
 import 'notifications_screen.dart';
+import 'wishlist_screen.dart';
 import 'app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -195,6 +196,38 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 16),
               GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WishlistScreen()),
+                  );
+                  if (mounted) setState(() {});
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.favorite_border, size: 24, color: Colors.black87),
+                      if (mockProducts.any((p) => p.isWishlisted))
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: AppColors.accent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -225,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: _browseTabs.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          separatorBuilder: (_, _) => const SizedBox(width: 10),
           itemBuilder: (context, index) {
             final selected = index == _browseTabIndex;
             return GestureDetector(
@@ -320,14 +353,10 @@ class _BestSellerCardState extends State<_BestSellerCard> {
               borderRadius: BorderRadius.circular(12),
               child: Hero(
                 tag: 'product_${product.id}',
-                child: Image.network(
+                child: Image.asset(
                   product.imageUrl,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return Container(color: Colors.grey[200]);
-                  },
                   errorBuilder: (context, error, stackTrace) => Container(
                     color: Colors.grey[200],
                     child: Icon(Icons.image_outlined, color: Colors.grey[400]),

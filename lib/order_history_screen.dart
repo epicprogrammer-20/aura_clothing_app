@@ -59,9 +59,8 @@ final List<OrderModel> mockOrders = [
     id: 'AB1042',
     orderDate: 'Aug 28, 2026',
     total: '\$189',
-    itemTitle: 'Classic Burgundy Leather Jacket',
-    itemImageUrl:
-    'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=200',
+    itemTitle: 'Black Aura Hoodie',
+    itemImageUrl: 'assets/images/products/blavkhood.png',
     status: OrderStatus.inTransit,
     statusDate: 'Arriving Sep 18',
     size: 'M',
@@ -69,7 +68,7 @@ final List<OrderModel> mockOrders = [
     subtotal: 189,
     shippingCost: 0,
     tax: 0,
-    colorName: 'Burgundy',
+    colorName: 'Black',
     trackingStage: 2,
     trackingLabel: 'Packet In Delivery',
   ),
@@ -77,9 +76,8 @@ final List<OrderModel> mockOrders = [
     id: 'CD2201',
     orderDate: 'Sep 2, 2026',
     total: '\$45',
-    itemTitle: 'Ribbed Wool Beanie',
-    itemImageUrl:
-    'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=200',
+    itemTitle: 'Aura Cap',
+    itemImageUrl: 'assets/images/products/hat.png',
     status: OrderStatus.inTransit,
     statusDate: 'Arriving Sep 21',
     size: 'One Size',
@@ -87,7 +85,7 @@ final List<OrderModel> mockOrders = [
     subtotal: 45,
     shippingCost: 0,
     tax: 0,
-    colorName: 'Grey',
+    colorName: 'Black',
     trackingStage: 0,
     trackingLabel: 'Order Packed',
   ),
@@ -95,9 +93,8 @@ final List<OrderModel> mockOrders = [
     id: 'EF7858',
     orderDate: 'Aug 14, 2026',
     total: '\$78',
-    itemTitle: 'Cream Knit Sweater',
-    itemImageUrl:
-    'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=200',
+    itemTitle: 'Green Aura Hoodie',
+    itemImageUrl: 'assets/images/products/greenhood.png',
     status: OrderStatus.delivered,
     statusDate: 'Arrived Aug 17',
     size: 'S',
@@ -105,16 +102,15 @@ final List<OrderModel> mockOrders = [
     subtotal: 78,
     shippingCost: 0,
     tax: 0,
-    colorName: 'Cream',
+    colorName: 'Green',
     isReviewed: false,
   ),
   OrderModel(
     id: 'GH9043',
     orderDate: 'Jul 20, 2026',
     total: '\$280',
-    itemTitle: 'Charcoal Wool Overcoat',
-    itemImageUrl:
-    'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=200',
+    itemTitle: 'Black Puffer Jacket',
+    itemImageUrl: 'assets/images/products/pufferblack.png',
     status: OrderStatus.delivered,
     statusDate: 'Arrived Jul 24',
     size: 'L',
@@ -122,16 +118,15 @@ final List<OrderModel> mockOrders = [
     subtotal: 280,
     shippingCost: 0,
     tax: 0,
-    colorName: 'Charcoal',
+    colorName: 'Black',
     isReviewed: true,
   ),
   OrderModel(
     id: 'IJ1120',
     orderDate: 'Jul 30, 2026',
     total: '\$130',
-    itemTitle: 'Relaxed Denim Jacket',
-    itemImageUrl:
-    'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=200',
+    itemTitle: 'Blue Aura Hoodie',
+    itemImageUrl: 'assets/images/products/bluehood.png',
     status: OrderStatus.cancelled,
     statusDate: 'Cancelled Jul 31',
     size: 'L',
@@ -139,7 +134,7 @@ final List<OrderModel> mockOrders = [
     subtotal: 130,
     shippingCost: 0,
     tax: 0,
-    colorName: 'Denim Blue',
+    colorName: 'Blue',
   ),
 ];
 
@@ -441,7 +436,7 @@ class _OrderCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
+                child: Image.asset(
                   order.itemImageUrl,
                   width: 64,
                   height: 64,
@@ -588,7 +583,7 @@ void showReviewSheet(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
+                        child: Image.asset(
                           order.itemImageUrl,
                           width: 56,
                           height: 56,

@@ -155,7 +155,7 @@ class OrderDetailScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
+                      child: Image.asset(
                         order.itemImageUrl,
                         width: 70,
                         height: 70,

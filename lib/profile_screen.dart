@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'user_model.dart';
 import 'order_history_screen.dart';
+import 'points_screen.dart';
 import 'help_centre_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'settings_screen.dart';
@@ -284,6 +285,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const OrderHistoryScreen()),
+            );
+          },
+        ),
+        _menuRow(
+          icon: Icons.stars_rounded,
+          label: 'Aura Points',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PointsScreen()),
             );
           },
         ),

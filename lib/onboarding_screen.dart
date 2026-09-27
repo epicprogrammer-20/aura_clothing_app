@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'signup_screen.dart';
+import 'welcome_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -14,30 +14,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Swap the image urls below for your own assets.
-  // Use AssetImage('assets/images/xxx.jpg') if you're bundling local images
-  // (register the assets folder in pubspec.yaml).
   final List<Map<String, String>> _pages = [
     {
       'title': 'FIND YOUR STYLE',
       'description':
       'Discover looks curated just for you, refreshed every single day.',
-      'image':
-      'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200',
+      'image': 'assets/images/splashscreen/splash1.png',
     },
     {
       'title': 'PICK THE BEST',
       'description':
       'Compare, shortlist, and choose from thousands of hand-picked pieces.',
-      'image':
-      'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200',
+      'image': 'assets/images/splashscreen/splash2.png',
     },
     {
       'title': 'CHOOSE YOUR LOOK',
       'description':
       'Build outfits that feel like you — bold, simple, or somewhere in between.',
-      'image':
-      'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1200',
+      'image': 'assets/images/splashscreen/splash1.png',
     },
   ];
 
@@ -47,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const SignUpScreen(),
+        builder: (context) => const WelcomeScreen(),
       ),
     );
   }
@@ -75,7 +69,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isSmallScreen = size.height < 700;
     final isTablet = size.width > 600;
 
-    // Cap content width on tablets/large screens so text doesn't stretch edge to edge
     final contentMaxWidth = isTablet ? 480.0 : size.width;
 
     return Scaffold(
@@ -83,9 +76,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // SINGLE PageView drives both the image and the text together.
-          // This is the fix: previously two PageViews shared one controller,
-          // which broke nextPage().
           PageView.builder(
             controller: _pageController,
             itemCount: _pages.length,
@@ -93,15 +83,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               setState(() => _currentPage = index);
             },
             itemBuilder: (context, index) {
-              return Image.network(
+              return Image.asset(
                 _pages[index]['image']!,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Container(color: Colors.grey[900]);
-                },
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey[900],
                 ),
@@ -109,7 +95,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
           ),
 
-          // Dark gradient scrim so text stays readable over any image
           IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
@@ -127,14 +112,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
 
-          // Foreground content
           SafeArea(
             child: Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: contentMaxWidth),
                 child: Column(
                   children: [
-                    // Skip button
                     Align(
                       alignment: Alignment.topRight,
                       child: Padding(
@@ -165,7 +148,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                     const Spacer(),
 
-                    // Text synced to _currentPage — no second PageView needed
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: isTablet ? 0 : 32.0,
@@ -215,7 +197,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                     SizedBox(height: isSmallScreen ? 16 : 24),
 
-                    // Dot indicators
                     SmoothPageIndicator(
                       controller: _pageController,
                       count: _pages.length,
@@ -230,7 +211,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                     SizedBox(height: isSmallScreen ? 20 : 32),
 
-                    // Bottom row: page counter + next/get-started button
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: isTablet ? 0 : 32.0,

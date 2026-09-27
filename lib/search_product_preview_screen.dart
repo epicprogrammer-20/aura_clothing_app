@@ -119,7 +119,7 @@ class _SearchProductPreviewScreenState extends State<SearchProductPreviewScreen>
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: product.personVisible ? () => setState(() => _showTag = !_showTag) : null,
-                  child: Image.network(
+                  child: Image.asset(
                     images[index],
                     fit: BoxFit.cover,
                     width: double.infinity,
@@ -277,7 +277,7 @@ class _SearchProductPreviewScreenState extends State<SearchProductPreviewScreen>
                                   ),
                                 ),
                                 child: ClipOval(
-                                  child: Image.network(
+                                  child: Image.asset(
                                     images[index],
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, _, _) => Container(color: Colors.grey.shade800),
