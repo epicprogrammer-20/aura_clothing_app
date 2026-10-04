@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'category_model.dart';
 import 'category_card.dart';
-import 'category_products_screen.dart';
 import 'product_model.dart';
 import 'cart_service.dart';
 import 'product_detail_screen.dart';
@@ -10,11 +9,20 @@ import 'auth_service.dart';
 import 'app_colors.dart';
 import 'banner_model.dart';
 import 'promo_banner_carousel.dart';
+import 'deals_screen.dart';
+import 'category_showcase_screen.dart';
+import 'women_screen.dart';
+import 'men_screen.dart';
+import 'sport_screen.dart';
+import 'accessories_screen.dart';
+import 'headwear_screen.dart';
 
 const List<String> kShopProductFilters = [
   'All',
   'New Arrivals',
   'Outerwear',
+  'Tops',
+  'Accessories',
   'Suits',
   'Knitwear',
 ];
@@ -26,8 +34,34 @@ const List<String> kSortOptions = [
   'Price: High to Low',
 ];
 
+// The Shop screen's category banners each open their own dedicated screen.
+// "Promotion" is the one exception — it leads straight to the existing
+// Deals screen instead of a category product listing.
+Widget _screenForCategory(CategoryModel category) {
+  switch (category.label) {
+    case 'Women':
+      return const WomenScreen();
+    case 'Men':
+      return const MenScreen();
+    case 'Sport':
+      return const SportScreen();
+    case 'Promotion':
+      return const DealsScreen();
+    case 'Accessories':
+      return const AccessoriesScreen();
+    case 'Headwear':
+      return const HeadwearScreen();
+    default:
+      return CategoryShowcaseScreen(category: category);
+  }
+}
+
 class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key});
+  // Lets other screens (e.g. Home's category tiles) open Shop already
+  // filtered to a category. Must match an entry in kShopProductFilters.
+  final String? initialFilter;
+
+  const ShopScreen({super.key, this.initialFilter});
 
   @override
   State<ShopScreen> createState() => _ShopScreenState();
@@ -47,6 +81,12 @@ class _ShopScreenState extends State<ShopScreen> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFilter = widget.initialFilter ?? 'All';
+  }
 
   @override
   void dispose() {
@@ -226,8 +266,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  CategoryProductsScreen(category: category),
+                              builder: (context) => _screenForCategory(category),
                             ),
                           );
                         },

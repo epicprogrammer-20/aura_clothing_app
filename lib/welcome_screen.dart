@@ -3,6 +3,10 @@ import 'signin_screen.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
 
+// Background picture for the welcome screen. Add the file to
+// assets/images/ and list it under `assets:` in pubspec.yaml.
+const String kWelcomeBackground = 'assets/images/welcome_bg.png';
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -34,7 +38,48 @@ class WelcomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Full-screen background picture.
+          Image.asset(
+            kWelcomeBackground,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                Container(color: Colors.white),
+          ),
+          // Light white wash so everything stays readable.
+          Container(color: Colors.white.withValues(alpha: 0.12)),
+          // Soft white glow behind the logo and text. It also covers the
+          // "Defined by simplicity" handwriting baked into the middle of
+          // the picture so it doesn't clash with the heading.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.12),
+                radius: 0.72,
+                colors: [Color(0xEBFFFFFF), Color(0x00FFFFFF)],
+              ),
+            ),
+          ),
+          // Fade at the bottom for the buttons and "Skip for now".
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: 0.32,
+              widthFactor: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Color(0xE6FFFFFF), Color(0x00FFFFFF)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
@@ -123,6 +168,8 @@ class WelcomeScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+        ],
       ),
     );
   }

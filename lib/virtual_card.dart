@@ -1,12 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// A sleek, black-and-white premium virtual card with a realistic 3D
-/// flip animation between its front and back faces.
-///
-/// The front shows the masked card number, cardholder name and expiry.
-/// The back shows the magnetic stripe and CVV. Pass [showBack] as true
-/// (typically when the CVV field has focus) to flip to the back face.
+
 class VirtualCard extends StatefulWidget {
   final String cardNumber;
   final String cardHolder;
@@ -350,8 +345,7 @@ class _CardBack extends StatelessWidget {
   }
 }
 
-/// A generic dual-circle network mark, in keeping with the strict
-/// black-and-white aesthetic (no third-party brand marks reproduced).
+
 class _NetworkMark extends StatelessWidget {
   final bool small;
   const _NetworkMark({this.small = false});

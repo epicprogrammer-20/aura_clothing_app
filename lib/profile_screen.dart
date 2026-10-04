@@ -3,7 +3,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'user_model.dart';
 import 'order_history_screen.dart';
+import 'my_size_screen.dart';
 import 'points_screen.dart';
+import 'order_support_screen.dart';
 import 'help_centre_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'settings_screen.dart';
@@ -33,8 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _editLinkedAccounts() {
-    final instagramController =
-    TextEditingController(text: _user.instagramHandle ?? '');
     final facebookController =
     TextEditingController(text: _user.facebookUrl ?? '');
 
@@ -62,15 +62,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: instagramController,
-                decoration: const InputDecoration(
-                  labelText: 'Instagram username',
-                  prefixText: '@',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
                 controller: facebookController,
                 decoration: const InputDecoration(
                   labelText: 'Facebook profile URL',
@@ -84,9 +75,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      _user.instagramHandle = instagramController.text.trim().isEmpty
-                          ? null
-                          : instagramController.text.trim();
                       _user.facebookUrl = facebookController.text.trim().isEmpty
                           ? null
                           : facebookController.text.trim();
@@ -238,17 +226,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Wrap(
                   spacing: 16,
                   children: [
-                    if (_user.instagramHandle != null)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const FaIcon(FontAwesomeIcons.instagram,
-                              size: 14, color: Colors.black87),
-                          const SizedBox(width: 6),
-                          Text('@${_user.instagramHandle}',
-                              style: const TextStyle(fontSize: 13)),
-                        ],
-                      ),
                     if (_user.facebookUrl != null)
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -258,8 +235,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(width: 6),
                           Text('Facebook linked', style: TextStyle(fontSize: 13)),
                         ],
-                      ),
-                    if (_user.instagramHandle == null && _user.facebookUrl == null)
+                      )
+                    else
                       Text(
                         'No linked accounts',
                         style: TextStyle(fontSize: 13, color: Colors.grey[400]),
@@ -289,12 +266,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
         _menuRow(
+          icon: Icons.straighten_outlined,
+          label: 'My Size',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MySizeScreen()),
+            );
+          },
+        ),
+        _menuRow(
           icon: Icons.stars_rounded,
           label: 'Aura Points',
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PointsScreen()),
+            );
+          },
+        ),
+        _menuRow(
+          icon: Icons.support_agent_outlined,
+          label: 'Order Support',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OrderSupportScreen()),
             );
           },
         ),

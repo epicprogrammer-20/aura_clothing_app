@@ -28,6 +28,13 @@ class ProductModel {
   // The detail screen should show [imageUrl, ...imageUrls] as the full set.
   final List<String> imageUrls;
 
+  // Placeholder engagement stats powering the Home screen's "Most Viewed"
+  // and "New" tabs. Replace with real numbers from analytics/the catalog
+  // API once the backend is wired up — viewCount should come from actual
+  // page-view tracking, and addedAt from the product's real creation date.
+  final int viewCount;
+  final DateTime addedAt;
+
   ProductModel({
     required this.id,
     required this.title,
@@ -46,7 +53,9 @@ class ProductModel {
     this.badge,
     this.inStock = true,
     this.imageUrls = const [],
-  });
+    this.viewCount = 0,
+    DateTime? addedAt,
+  }) : addedAt = addedAt ?? DateTime(2026, 1, 1);
 
   // Parses "$189" / "$1,299.00" -> 189.0 / 1299.0, for sorting & filtering.
   double get priceValue {
@@ -74,6 +83,8 @@ final List<ProductModel> mockProducts = [
     instagramHandle: 'jordan.k',
     personVisible: false,
     badge: 'NEW',
+    viewCount: 2140,
+    addedAt: DateTime(2026, 8, 20),
   ),
   ProductModel(
     id: '2',
@@ -86,6 +97,8 @@ final List<ProductModel> mockProducts = [
     instagramHandle: 'miasantos',
     facebookUrl: 'https://facebook.com/miasantos',
     personVisible: false,
+    viewCount: 3510,
+    addedAt: DateTime(2026, 7, 12),
   ),
   ProductModel(
     id: '3',
@@ -95,6 +108,8 @@ final List<ProductModel> mockProducts = [
     imageHeight: 260,
     category: 'Outerwear',
     personVisible: false,
+    viewCount: 980,
+    addedAt: DateTime(2026, 6, 30),
   ),
   ProductModel(
     id: '4',
@@ -106,6 +121,8 @@ final List<ProductModel> mockProducts = [
     postedByName: 'Theo Brandt',
     instagramHandle: 'theobrandt',
     personVisible: false,
+    viewCount: 1420,
+    addedAt: DateTime(2026, 9, 5),
   ),
   ProductModel(
     id: '5',
@@ -116,6 +133,8 @@ final List<ProductModel> mockProducts = [
     category: 'Outerwear',
     personVisible: false,
     inStock: false,
+    viewCount: 640,
+    addedAt: DateTime(2026, 5, 18),
   ),
   ProductModel(
     id: '6',
@@ -129,6 +148,8 @@ final List<ProductModel> mockProducts = [
     facebookUrl: 'https://facebook.com/aurastudio',
     personVisible: false,
     badge: 'LIMITED',
+    viewCount: 4220,
+    addedAt: DateTime(2026, 9, 18),
   ),
   ProductModel(
     id: '7',
@@ -144,5 +165,7 @@ final List<ProductModel> mockProducts = [
     postedByName: 'Josh',
     personVisible: true,
     badge: 'NEW',
+    viewCount: 1875,
+    addedAt: DateTime(2026, 9, 22),
   ),
 ];

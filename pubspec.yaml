@@ -45,6 +45,10 @@ dependencies:
   pdf: ^3.11.1
   printing: ^5.13.1
 
+  lottie: ^3.3.1
+  video_player: ^2.9.2
+  shared_preferences: ^2.3.2
+
 
 
 dev_dependencies:
@@ -76,10 +80,15 @@ flutter:
     - assets/images/Gpay.svg
     - assets/images/InnBucks.png
     - assets/images/eco.png
+    - assets/images/welcome_bg.png
+    - assets/images/deal_banner.png
+
     - assets/images/products/
     - assets/images/banners/
     - assets/images/splashscreen/
     - assets/images/models/
+    - assets/aura/
+    - assets/videos/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

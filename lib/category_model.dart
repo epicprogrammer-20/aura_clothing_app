@@ -14,48 +14,59 @@ class CategoryModel {
   });
 }
 
-// Placeholder images — swap for real brand photography once available.
+// Local pictures (no internet needed). These reuse photos you already have;
+// swap each path for dedicated category photography whenever you like.
 final List<CategoryModel> mockCategories = [
   CategoryModel(
     label: 'Women',
     backgroundColor: const Color(0xFFB5473A),
     imageUrl:
-    'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=400',
+    'assets/images/products/pinkhoofd.png',
     icon: Icons.woman_outlined,
   ),
   CategoryModel(
     label: 'Men',
     backgroundColor: const Color(0xFF2B2B2B),
     imageUrl:
-    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=400',
+    'assets/images/models/josh1.png',
     icon: Icons.man_outlined,
   ),
   CategoryModel(
     label: 'Sport',
     backgroundColor: const Color(0xFFE39FB8),
     imageUrl:
-    'https://images.unsplash.com/photo-1517960413843-0aee8e2b3285?q=80&w=400',
+    'assets/images/products/bluehood.png',
     icon: Icons.sports_outlined,
   ),
   CategoryModel(
     label: 'Promotion',
     backgroundColor: const Color(0xFFD9A441),
     imageUrl:
-    'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=400',
+    'assets/images/products/greenhood.png',
     icon: Icons.local_offer_outlined,
   ),
   CategoryModel(
     label: 'Accessories',
     backgroundColor: const Color(0xFFB9AEDC),
     imageUrl:
-    'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=400',
+    'assets/images/products/hat.png',
     icon: Icons.watch_outlined,
   ),
   CategoryModel(
     label: 'Headwear',
     backgroundColor: const Color(0xFF5A7A6D),
     imageUrl:
-    'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?q=80&w=400',
+    'assets/images/products/hat.png',
     icon: Icons.trending_up_outlined,
   ),
 ];
+
+// Looks a category up by its display label (e.g. from a tapped banner).
+// Falls back to the first category if the label is somehow unknown, since
+// every caller already has a valid CategoryModel.label in hand.
+CategoryModel categoryByLabel(String label) {
+  return mockCategories.firstWhere(
+        (c) => c.label.toLowerCase() == label.toLowerCase(),
+    orElse: () => mockCategories.first,
+  );
+}

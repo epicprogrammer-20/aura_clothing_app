@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'home_screen.dart'; //
 import 'signin_screen.dart';
+import 'auth_service.dart';
+import 'user_model.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,6 +19,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _obscurePassword = true;
 
   void _goToHome() {
+    // Signing up should actually count as being logged in — this was
+    // previously missing, so a fresh sign-up landed on Home but still
+    // read as logged out everywhere (wishlist, checkout, Profile, etc.).
+    final name = _nameController.text.trim();
+    if (name.isNotEmpty) {
+      mockCurrentUser.name = name;
+    }
+    AuthService.instance.login();
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

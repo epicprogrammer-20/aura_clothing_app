@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'product_model.dart';
+import 'product_detail_screen.dart';
 import 'search_product_preview_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -452,28 +453,63 @@ class _ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // Only photos that actually show a model get the full-screen,
+        // Instagram-style preview with its image swiper — that treatment
+        // exists to showcase the look being worn. Plain product photography
+        // (the vast majority of the catalog) instead opens the regular
+        // product page, fitted rather than full-bleed, exactly like tapping
+        // a product on the Home screen.
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SearchProductPreviewScreen(product: product),
+            builder: (context) => product.personVisible
+                ? SearchProductPreviewScreen(product: product)
+                : ProductDetailScreen(product: product),
           ),
         );
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Hero(
-          tag: 'product_${product.id}',
-          child: Image.asset(
-            product.imageUrl,
-            height: product.imageHeight,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              height: product.imageHeight,
-              color: Colors.grey[200],
-              child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+        child: Stack(
+          children: [
+            Hero(
+              tag: 'product_${product.id}',
+              child: Image.asset(
+                product.imageUrl,
+                height: product.imageHeight,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: product.imageHeight,
+                  color: Colors.grey[200],
+                  child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                ),
+              ),
             ),
-          ),
+            // Black "MODEL" tag, only on photos that show a person wearing it.
+            if (product.personVisible)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'MODEL',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

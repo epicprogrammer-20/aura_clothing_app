@@ -30,6 +30,16 @@ class OrderModel {
   final String trackingLabel;
   bool isReviewed;
 
+  // Exact delivery moment, when known — powers the 72-hour return window on
+  // the Order Issue screen. Null for orders that haven't been delivered yet.
+  final DateTime? deliveredAt;
+
+  // There's no separate payment/refund ledger in this prototype, so this is
+  // derived from order status: a cancelled order is treated as refunded,
+  // everything else that reached checkout is treated as paid.
+  String get paymentStatus =>
+      status == OrderStatus.cancelled ? 'Refunded' : 'Paid';
+
   OrderModel({
     required this.id,
     required this.orderDate,
@@ -50,6 +60,7 @@ class OrderModel {
     this.trackingStage = 1,
     this.trackingLabel = 'Packet In Delivery',
     this.isReviewed = false,
+    this.deliveredAt,
   });
 }
 
@@ -104,6 +115,7 @@ final List<OrderModel> mockOrders = [
     tax: 0,
     colorName: 'Green',
     isReviewed: false,
+    deliveredAt: DateTime(2026, 8, 17, 14, 30),
   ),
   OrderModel(
     id: 'GH9043',
@@ -120,6 +132,7 @@ final List<OrderModel> mockOrders = [
     tax: 0,
     colorName: 'Black',
     isReviewed: true,
+    deliveredAt: DateTime(2026, 7, 24, 11, 0),
   ),
   OrderModel(
     id: 'IJ1120',

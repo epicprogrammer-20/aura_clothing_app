@@ -1,19 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'signin_screen.dart';
 
 class AuthService extends ChangeNotifier {
   AuthService._internal();
   static final AuthService instance = AuthService._internal();
 
+  static const String _loggedInKey = 'aura_is_logged_in';
+
   bool isLoggedIn = false;
+
+  /// Restores the saved login state. Called once from the splash screen so
+  /// users who were logged in when they closed the app skip straight to Home.
+  Future<void> load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      isLoggedIn = prefs.getBool(_loggedInKey) ?? false;
+      notifyListeners();
+    } catch (_) {
+      isLoggedIn = false;
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_loggedInKey, isLoggedIn);
+    } catch (_) {
+      // Persistence is best-effort; the in-memory state still works.
+    }
+  }
 
   void login() {
     isLoggedIn = true;
+    _save();
     notifyListeners();
   }
 
   void logout() {
     isLoggedIn = false;
+    _save();
     notifyListeners();
   }
 }

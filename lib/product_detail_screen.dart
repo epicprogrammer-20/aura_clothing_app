@@ -9,6 +9,8 @@ import 'currency_service.dart';
 import 'auth_service.dart';
 import 'search_screen.dart';
 import 'size_guide_screen.dart';
+import 'fit_profile_service.dart';
+import 'my_size_screen.dart';
 import 'review_model.dart';
 import 'app_colors.dart';
 
@@ -31,8 +33,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   bool _showProductTag = false;
 
+  // Size suggested from the user's saved measurements (My Size). It only
+  // pre-selects a size; the user can pick any size they like.
+  SizeRecommendation? _recommendation;
+
   final PageController _imageController = PageController();
   int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendation();
+  }
+
+  Future<void> _loadRecommendation({bool preselect = true}) async {
+    // Clothing only: accessories don't use body measurements.
+    if (widget.product.category == 'Accessories') return;
+    await FitProfileService.instance.load();
+    if (!mounted) return;
+    final rec = FitProfileService.instance.recommend(available: _sizes);
+    setState(() {
+      _recommendation = rec;
+      if (rec != null && preselect) _selectedSize = rec.size;
+    });
+  }
+
+  Future<void> _openMySize() async {
+    if (!requireLogin(context,
+        message: 'Log in to save your measurements')) {
+      return;
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MySizeScreen()),
+    );
+    // Back from My Size: refresh the suggestion and select it.
+    _loadRecommendation();
+  }
 
   @override
   void dispose() {
@@ -319,36 +356,124 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Row(
                         children: _sizes.map((s) {
                           final bool isSelected = s == _selectedSize;
+                          final bool isRecommended = s == _recommendation?.size;
                           return Padding(
                             padding: const EdgeInsets.only(right: 10),
                             child: GestureDetector(
                               onTap: () => setState(() => _selectedSize = s),
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isSelected ? AppColors.accent : Colors.white,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? AppColors.accent
-                                        : Colors.grey[300]!,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isSelected
+                                          ? AppColors.accent
+                                          : Colors.white,
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.accent
+                                            : Colors.grey[300]!,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      s,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  s,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected ? Colors.white : Colors.black,
-                                  ),
-                                ),
+                                  // Small check marks the suggested size even
+                                  // after the user picks a different one.
+                                  if (isRecommended)
+                                    Positioned(
+                                      top: -3,
+                                      right: -3,
+                                      child: Container(
+                                        width: 16,
+                                        height: 16,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: Colors.white, width: 1.5),
+                                        ),
+                                        child: const Icon(Icons.check,
+                                            size: 10, color: Colors.white),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           );
                         }).toList(),
                       ),
+                      if (_recommendation != null) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Icon(Icons.check_circle,
+                                size: 15, color: Colors.black87),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _recommendation!.adjusted
+                                    ? 'Closest to your size: ${_recommendation!.size}'
+                                    : 'Recommended for you: ${_recommendation!.size}',
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: _openMySize,
+                              child: Text(
+                                'Edit',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Based on your ${_recommendation!.basis}. You can pick any size.',
+                          style: TextStyle(
+                              fontSize: 11.5, color: Colors.grey[500]),
+                        ),
+                      ] else if (widget.product.category != 'Accessories') ...[
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: _openMySize,
+                          child: Row(
+                            children: [
+                              Icon(Icons.straighten,
+                                  size: 15, color: Colors.grey[700]),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Not sure? Get a size recommendation',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: Colors.grey[800],
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       GestureDetector(
                         onTap: () => SizeGuideSheet.show(context),

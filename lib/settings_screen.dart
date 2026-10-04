@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'currency_service.dart';
-import 'notifications_screen.dart';
+import 'notification_settings_screen.dart';
 import 'order_history_screen.dart';
-import 'profile_screen.dart';
+import 'account_screen.dart';
 import 'app_colors.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -22,12 +22,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => const _CurrencyPickerSheet(),
-    );
-  }
-
-  void _comingSoon(String label) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label coming soon')),
     );
   }
 
@@ -65,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                  MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()),
                 );
               },
             ),
@@ -86,18 +80,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             _divider(),
             _settingsRow(
-              icon: Icons.payment_outlined,
-              label: 'Recent Payments',
-              onTap: () => _comingSoon('Recent Payments'),
-            ),
-            _divider(),
-            _settingsRow(
               icon: Icons.person_outline,
               label: 'Account',
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  MaterialPageRoute(builder: (_) => const AccountScreen()),
                 );
               },
             ),

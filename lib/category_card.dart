@@ -48,7 +48,7 @@ class CategoryCard extends StatelessWidget {
               bottom: 0,
               top: 0,
               width: imageWidth,
-              child: Image.network(
+              child: Image.asset(
                 category.imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => const SizedBox(),

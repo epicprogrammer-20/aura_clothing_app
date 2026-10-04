@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'banner_model.dart';
+import 'deals_screen.dart';
+import 'home_screen.dart';
 
 // Desaturates the promo images so the carousel stays on-brand
 // (strict black & white) instead of showing colourful product photos.
@@ -29,6 +31,29 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
     super.dispose();
   }
 
+  // Where each banner leads. Keyed by banner.id rather than position so it
+  // stays correct even if banners get reordered or an admin panel later
+  // changes which ones are active — "1st and 3rd" in the design brief were
+  // banner1 and banner4 (the two discount banners); banner2 is the "new
+  // arrivals" banner and leads back to the Home feed.
+  void _handleTap(BuildContext context, BannerModel banner) {
+    switch (banner.id) {
+      case 'banner1':
+      case 'banner4':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DealsScreen()),
+        );
+        break;
+      case 'banner2':
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final banners = widget.banners;
@@ -46,7 +71,9 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               final banner = banners[index];
               return Padding(
                 padding: const EdgeInsets.only(left: 16, right: 8),
-                child: ClipRRect(
+                child: GestureDetector(
+                  onTap: () => _handleTap(context, banner),
+                  child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
                     decoration: BoxDecoration(
@@ -118,6 +145,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ),
               );

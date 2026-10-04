@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'currency_service.dart';
 import 'order_history_screen.dart';
+import 'order_issue_screen.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final OrderModel order;
@@ -338,7 +339,15 @@ class OrderTrackingScreen extends StatelessWidget {
       width: double.infinity,
       height: 50,
       child: OutlinedButton.icon(
-        onPressed: () => _confirmCancel(context),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OrderIssueScreen(
+              order: order,
+              initialIssueType: OrderIssueType.cancelOrder,
+            ),
+          ),
+        ),
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
@@ -350,38 +359,6 @@ class OrderTrackingScreen extends StatelessWidget {
           'Cancel Order',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Colors.black),
         ),
-      ),
-    );
-  }
-
-  void _confirmCancel(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text('Cancel order?', style: TextStyle(color: Colors.black)),
-        content: const Text(
-          'Are you sure you want to cancel this order?',
-          style: TextStyle(color: Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('No', style: TextStyle(color: Colors.black)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Order cancellation requested')),
-              );
-            },
-            child: const Text(
-              'Yes, cancel',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
       ),
     );
   }

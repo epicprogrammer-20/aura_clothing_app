@@ -1,16 +1,20 @@
 class UserModel {
-  final String name;
+  String name;
   final String bio;
   final String? avatarUrl;
-  String? instagramHandle;
   String? facebookUrl;
+
+  // For SMS-based password reset once a backend/SMS provider is wired up.
+  // Optional — the email-based reset flow (see forgot_password_screen.dart)
+  // works whether or not this is set.
+  String? phoneNumber;
 
   UserModel({
     required this.name,
     required this.bio,
     this.avatarUrl,
-    this.instagramHandle,
     this.facebookUrl,
+    this.phoneNumber,
   });
 
   // Used for the initials avatar — first letter of the first name.
@@ -28,6 +32,6 @@ final UserModel mockCurrentUser = UserModel(
   name: 'Alex Rivera',
   bio: 'Streetwear enthusiast. Always hunting for the next fit.',
   avatarUrl: null,
-  instagramHandle: 'alex.rivera',
   facebookUrl: null,
+  phoneNumber: null,
 );
